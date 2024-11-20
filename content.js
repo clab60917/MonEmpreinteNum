@@ -1,117 +1,73 @@
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    if (request.type === "GET_DATA") {
-      const data = {
-        cookies: document.cookie,
-        technicalInfo: {
-          userAgent: navigator.userAgent,
-          language: navigator.language,
-          screenResolution: `${window.screen.width}x${window.screen.height}`,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          connection: navigator.connection ? {
-            type: navigator.connection.effectiveType,
-            downlink: navigator.connection.downlink + ' Mbps',
-            rtt: navigator.connection.rtt + 'ms'
-          } : 'Non disponible',
-          mode: window.history.length ? 'Navigation normale' : 'Navigation privée possible',
-          // Nouvelles informations
-          device: {
-            memory: navigator.deviceMemory ? navigator.deviceMemory + 'GB' : 'Non disponible',
-            cores: navigator.hardwareConcurrency ? navigator.hardwareConcurrency + ' cores' : 'Non disponible',
-            battery: 'Checking...'
+// content.js
+chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+      if (request.type === "GET_DATA") {
+        const data = {
+          cookies: document.cookie,
+          navigationData: {
+            currentURL: window.location.href,
+            referrer: document.referrer
           },
-          security: {
-            https: window.location.protocol === 'https:',
-            certificate: window.location.protocol === 'https:' ? 'SSL/TLS actif' : 'Non sécurisé',
-            permissions: checkPermissions()
+          technicalInfo: {
+            userAgent: navigator.userAgent,
+            language: navigator.language,
+            screenResolution: `${window.screen.width}x${window.screen.height}`,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            connection: navigator.connection ? navigator.connection.effectiveType : 'Non disponible',
+            mode: window.history.length ? 'Navigation normale' : 'Navigation privée possible'
           },
-          webGL: detectWebGL(),
-          audioContext: detectAudioContext(),
-          canvas: detectCanvas()
-        },
-        formData: Array.from(document.forms).map(form => ({
-          id: form.id || 'Formulaire sans ID',
-          elements: form.elements.length,
-          types: getFormFieldTypes(form)
-        })),
-        scripts: detectThirdPartyScripts(),
-        apis: detectSensitiveAPIs()
-      };
-  
-      // Vérification de la batterie si disponible
-      if (navigator.getBattery) {
-        navigator.getBattery().then(battery => {
-          data.technicalInfo.device.battery = `${Math.round(battery.level * 100)}% ${battery.charging ? '(en charge)' : ''}`;
-        });
-      }
-  
-      sendResponse(data);
-    }
-    return true;
-  });
-  
-  // Fonctions utilitaires pour content.js
-  function checkPermissions() {
-    const permissions = {
-      geolocation: 'geolocation' in navigator,
-      notifications: 'Notification' in window,
-      microphone: 'MediaRecorder' in window,
-      camera: navigator.mediaDevices && 'getUserMedia' in navigator.mediaDevices,
-      clipboard: 'clipboard' in navigator
-    };
-    return Object.entries(permissions)
-      .filter(([_, available]) => available)
-      .map(([name]) => name);
-  }
-  
-  function detectWebGL() {
-    const canvas = document.createElement('canvas');
-    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-    return gl ? true : false;
-  }
-  
-  function detectAudioContext() {
-    return 'AudioContext' in window || 'webkitAudioContext' in window;
-  }
-  
-  function detectCanvas() {
-    const canvas = document.createElement('canvas');
-    return !!(canvas.getContext && canvas.getContext('2d'));
-  }
-  
-  function getFormFieldTypes(form) {
-    const types = {};
-    Array.from(form.elements).forEach(element => {
-      if (element.type) {
-        types[element.type] = (types[element.type] || 0) + 1;
-      }
-    });
-    return types;
-  }
-  
-  function detectThirdPartyScripts() {
-    const scripts = Array.from(document.scripts);
-    return scripts
-      .filter(script => script.src)
-      .map(script => {
-        const url = new URL(script.src);
-        return {
-          domain: url.hostname,
-          url: script.src
+          formData: Array.from(document.forms).map(form => ({
+            id: form.id || 'Formulaire sans ID',
+            elements: form.elements.length
+          }))
         };
-      })
-      .filter(script => script.domain !== window.location.hostname);
-  }
+        sendResponse(data);
+      }
+    }
+  );
   
-  function detectSensitiveAPIs() {
-    return {
-      localStorage: 'localStorage' in window,
-      sessionStorage: 'sessionStorage' in window,
-      indexedDB: 'indexedDB' in window,
-      serviceWorker: 'serviceWorker' in navigator,
-      webRTC: 'RTCPeerConnection' in window,
-      bluetooth: 'bluetooth' in navigator,
-      usb: 'usb' in navigator,
-      nfc: 'nfc' in navigator
+  // Fonction pour calculer le score et mettre à jour le badge automatiquement
+  function updateBadgeAuto() {
+    const data = {
+      cookies: document.cookie,
+      navigationData: {
+        currentURL: window.location.href,
+        referrer: document.referrer
+      },
+      technicalInfo: {
+        userAgent: navigator.userAgent,
+        language: navigator.language,
+        screenResolution: `${window.screen.width}x${window.screen.height}`
+      },
+      formData: Array.from(document.forms).map(form => ({
+        id: form.id || 'Formulaire sans ID',
+        elements: form.elements.length
+      }))
     };
+  
+    // Calcul du score
+    let score = 100;
+    const cookiesCount = data.cookies.split(';').filter(c => c.trim()).length;
+    score -= cookiesCount * 5;
+    if (cookiesCount > 10) score -= 10;
+  
+    const cookieString = data.cookies.toLowerCase();
+    if (cookieString.includes('_ga')) score -= 15;
+    if (cookieString.includes('fbp')) score -= 20;
+    if (cookieString.includes('analytics')) score -= 10;
+  
+    const formFields = data.formData.reduce((acc, form) => acc + form.elements, 0);
+    score -= Math.min(20, formFields * 2);
+  
+    score = Math.max(0, Math.min(100, Math.round(score)));
+  
+    // Mise à jour du badge
+    chrome.runtime.sendMessage({
+      type: "UPDATE_BADGE",
+      score: score
+    });
   }
   
+  // Mise à jour au chargement de la page
+  document.addEventListener('DOMContentLoaded', updateBadgeAuto);
+  window.addEventListener('load', updateBadgeAuto);

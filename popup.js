@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
       chrome.tabs.sendMessage(tabs[0].id, {type: "GET_DATA"}, function(response) {
         if (response) {
-          // Calcul et affichage du score amélioré
+          // Calcul et affichage du score
           const scoreData = calculatePrivacyScore(response);
           updatePrivacyScore(scoreData);
   
@@ -42,44 +42,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 <span class="text-sm">${response.technicalInfo.language}</span>
               </div>
               <div class="bg-green-50 p-3 rounded">
-                <span class="font-medium">📱 Écran</span><br>
+                <span class="font-medium">📱 Résolution</span><br>
                 <span class="text-sm">${response.technicalInfo.screenResolution}</span>
               </div>
               <div class="bg-green-50 p-3 rounded">
-                <span class="font-medium">🕒 Fuseau</span><br>
+                <span class="font-medium">🕒 Fuseau horaire</span><br>
                 <span class="text-sm">${response.technicalInfo.timezone}</span>
               </div>
-              <div class="bg-green-50 p-3 rounded">
-                <span class="font-medium">📡 Connexion</span><br>
-                <span class="text-sm">${
-                  typeof response.technicalInfo.connection === 'object' 
-                  ? `${response.technicalInfo.connection.type} (${response.technicalInfo.connection.downlink})`
-                  : response.technicalInfo.connection
-                }</span>
-              </div>
-              <div class="bg-green-50 p-3 rounded">
-                <span class="font-medium">🔍 Navigation</span><br>
-                <span class="text-sm">${response.technicalInfo.mode}</span>
-              </div>
-            </div>
-          `;
-  
-          // Formulaires
-          const formContainer = document.getElementById('formData');
-          formContainer.innerHTML = `
-            <h2 class="text-lg font-semibold text-purple-600 mb-3">Formulaires détectés</h2>
-            <div class="space-y-2">
-              ${response.formData.map(form => `
-                <div class="bg-purple-50 p-3 rounded">
-                  <span class="font-medium">📝 ${form.id}</span>
-                  <div class="text-sm mt-1">
-                    ${form.elements} champs détectés
-                    ${form.types ? `<br>Types: ${Object.entries(form.types).map(([type, count]) => 
-                      `${count} ${type}`
-                    ).join(', ')}` : ''}
-                  </div>
-                </div>
-              `).join('')}
             </div>
           `;
         }
@@ -90,29 +59,32 @@ document.addEventListener('DOMContentLoaded', function() {
   function calculatePrivacyScore(data) {
     let score = 100;
     
-    // 1. Pénalités pour les cookies
+    // Pénalités pour les cookies
     const cookiesCount = data.cookies.split(';').filter(c => c.trim()).length;
     score -= cookiesCount * 5;
-    if (cookiesCount > 10) score -= 10;
   
-    // 2. Pénalités pour trackers majeurs
+    // Pénalités pour trackers spécifiques
     const cookieString = data.cookies.toLowerCase();
     const trackers = {
-      google: {
-        patterns: ['_ga', '_gid', 'google'],
-        penalty: 15
+      analytics: {
+        patterns: ['_ga', '_gid', 'analytics', 'gtag'],
+        penalty: 15,
+        description: 'Analyse du comportement'
       },
-      facebook: {
-        patterns: ['fbp', 'facebook', '_fbp'],
-        penalty: 20
+      social: {
+        patterns: ['fbp', 'facebook', 'twitter', 'linkedin', 'instagram'],
+        penalty: 20,
+        description: 'Réseaux sociaux'
       },
-      marketing: {
-        patterns: ['adwords', 'analytics', 'tracking', 'campaign'],
-        penalty: 10
+      ads: {
+        patterns: ['adwords', 'ads', 'doubleclick', 'adsense', 'campaign'],
+        penalty: 15,
+        description: 'Publicité'
       },
-      behavioral: {
-        patterns: ['user', 'session', 'visitor'],
-        penalty: 8
+      tracking: {
+        patterns: ['tracking', 'visitor', 'session', 'uid', 'user'],
+        penalty: 10,
+        description: 'Suivi utilisateur'
       }
     };
   
@@ -122,40 +94,33 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   
-    // 3. Pénalités pour les formulaires
-    const formFields = data.formData.reduce((acc, form) => acc + form.elements, 0);
-    score -= Math.min(20, formFields * 2);
-  
-    // 4. Évaluation finale
-    let rating;
-    if (score >= 90) {
-      rating = "Excellent";
-    } else if (score >= 75) {
-      rating = "Bon";
-    } else if (score >= 60) {
-      rating = "Moyen";
-    } else if (score >= 40) {
-      rating = "Préoccupant";
-    } else {
-      rating = "Critique";
-    }
+    // Garantir un score entre 0 et 100
+    score = Math.max(0, Math.min(100, Math.round(score)));
   
     return {
-      score: Math.max(0, Math.min(100, Math.round(score))),
-      rating: rating,
+      score: score,
+      rating: score >= 90 ? "Excellent" :
+             score >= 75 ? "Bon" :
+             score >= 60 ? "Moyen" :
+             score >= 40 ? "Préoccupant" :
+             "Critique",
       details: {
         cookiesCount: cookiesCount,
         hasTrackers: Object.values(trackers).some(tracker => 
           tracker.patterns.some(pattern => cookieString.includes(pattern))
         ),
-        formFieldsCount: formFields
+        trackersFound: Object.entries(trackers)
+          .filter(([_, tracker]) => 
+            tracker.patterns.some(pattern => cookieString.includes(pattern))
+          )
+          .map(([key, tracker]) => tracker.description)
       }
     };
   }
   
   function updatePrivacyScore(scoreData) {
     const scoreContainer = document.getElementById('scoreContainer');
-  
+    
     scoreContainer.innerHTML = `
       <div class="text-center">
         <div class="text-3xl font-bold ${getScoreColorClass(scoreData.score)}">${scoreData.score}%</div>
@@ -164,21 +129,15 @@ document.addEventListener('DOMContentLoaded', function() {
           <div class="flex flex-col gap-1">
             <div>🍪 ${scoreData.details.cookiesCount} cookies détectés</div>
             ${scoreData.details.hasTrackers ? 
-              '<div class="text-red-500">⚠️ Trackers publicitaires présents</div>' : 
+              `<div class="text-red-500">⚠️ Trackers détectés :</div>
+               <div class="text-red-500 text-sm">${scoreData.details.trackersFound.join(', ')}</div>` : 
               '<div class="text-green-500">✅ Pas de trackers publicitaires</div>'}
-            ${scoreData.details.formFieldsCount > 0 ? 
-              `<div>📝 ${scoreData.details.formFieldsCount} champs de formulaire</div>` : ''}
           </div>
         </div>
       </div>
     `;
   
-    // Mise à jour du badge de l'extension
-    updateExtensionBadge(scoreData);
-  }
-  
-  function updateExtensionBadge(scoreData) {
-    // Définir la couleur en fonction du score
+    // Mise à jour du badge
     let color;
     if (scoreData.score >= 75) {
       color = [39, 174, 96, 255]; // Vert
@@ -188,14 +147,12 @@ document.addEventListener('DOMContentLoaded', function() {
       color = [231, 76, 60, 255]; // Rouge
     }
   
-    // Mettre à jour la couleur de la pastille
     chrome.action.setBadgeBackgroundColor({
       color: color
     });
   
-    // Mettre à jour le texte de la pastille
     chrome.action.setBadgeText({
-      text: `${scoreData.score}`
+      text: scoreData.score.toString()
     });
   }
   
@@ -238,6 +195,11 @@ document.addEventListener('DOMContentLoaded', function() {
         name: 'Campaign Tracker',
         icon: '📣',
         description: 'Suivi de campagne marketing'
+      },
+      'gtag': {
+        name: 'Google Tag Manager',
+        icon: '🏷️',
+        description: 'Gestionnaire de tags Google'
       }
     };
   
