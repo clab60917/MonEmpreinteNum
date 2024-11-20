@@ -2,18 +2,16 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="script-src 'self'">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-50 p-4" style="width: 500px;">
-  <h1 class="text-2xl font-bold mb-4">Données collectées</h1>
-  <p class="text-gray-600 mb-4">Voici les données que ce site peut voir sur vous :</p>
+  <h1 class="text-2xl font-bold mb-2">Données collectées</h1>
+  <p class="text-gray-600 mb-4">Voici les informations importantes détectées :</p>
 
-  <div id="cookiesData" class="bg-white p-4 rounded shadow mb-4 whitespace-pre-wrap"></div>
-  <div id="techData" class="bg-white p-4 rounded shadow mb-4 whitespace-pre-wrap"></div>
-  <div id="formData" class="bg-white p-4 rounded shadow whitespace-pre-wrap"></div>
+  <div id="cookiesData"></div>
+  <div id="techData"></div>
+  <div id="formData"></div>
 
   <script src="popup.js"></script>
 </body>
 </html>
-
