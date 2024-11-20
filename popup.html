@@ -5,25 +5,50 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
   <style>
     body { width: 500px; min-height: 400px; }
+    .data-section pre { white-space: pre-wrap; font-size: 0.875rem; }
   </style>
 </head>
 <body class="bg-gray-50 p-6">
   <h1 class="text-2xl font-bold text-gray-800 mb-6">Données collectées sur ce site</h1>
-  
+
   <div class="space-y-4">
-    <div class="bg-white rounded-lg shadow p-4">
-      <h2 class="text-lg font-semibold mb-2">Cookies</h2>
-      <pre id="cookiesData" class="bg-gray-50 p-2 rounded text-sm"></pre>
+    <!-- Cookies Section -->
+    <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+      <div class="flex items-center p-4 border-b border-gray-100">
+        <svg class="w-5 h-5 text-blue-500 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <h2 class="text-lg font-semibold text-gray-700">Cookies</h2>
+      </div>
+      <div class="p-4 bg-gray-50">
+        <pre id="cookiesData" class="text-gray-600"></pre>
+      </div>
     </div>
 
-    <div class="bg-white rounded-lg shadow p-4">
-      <h2 class="text-lg font-semibold mb-2">Informations Techniques</h2>
-      <pre id="techData" class="bg-gray-50 p-2 rounded text-sm"></pre>
+    <!-- Technical Info Section -->
+    <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+      <div class="flex items-center p-4 border-b border-gray-100">
+        <svg class="w-5 h-5 text-green-500 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2"/>
+        </svg>
+        <h2 class="text-lg font-semibold text-gray-700">Informations Techniques</h2>
+      </div>
+      <div class="p-4 bg-gray-50">
+        <pre id="techData" class="text-gray-600"></pre>
+      </div>
     </div>
 
-    <div class="bg-white rounded-lg shadow p-4">
-      <h2 class="text-lg font-semibold mb-2">Formulaires</h2>
-      <pre id="formData" class="bg-gray-50 p-2 rounded text-sm"></pre>
+    <!-- Forms Section -->
+    <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+      <div class="flex items-center p-4 border-b border-gray-100">
+        <svg class="w-5 h-5 text-purple-500 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586"/>
+        </svg>
+        <h2 class="text-lg font-semibold text-gray-700">Formulaires</h2>
+      </div>
+      <div class="p-4 bg-gray-50">
+        <pre id="formData" class="text-gray-600"></pre>
+      </div>
     </div>
   </div>
 
