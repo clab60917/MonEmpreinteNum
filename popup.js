@@ -1,40 +1,28 @@
+console.log("Popup script chargé");
 document.addEventListener('DOMContentLoaded', function() {
-    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-      chrome.tabs.sendMessage(tabs[0].id, {type: "GET_DATA"}, function(response) {
-        displayData(response);
-      });
+  console.log("DOM chargé");
+  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+    console.log("Tab active trouvée:", tabs[0].id);
+    chrome.tabs.sendMessage(tabs[0].id, {type: "GET_DATA"}, function(response) {
+      console.log("Réponse reçue:", response);
+      if (response) {
+        try {
+          document.getElementById('cookiesData').textContent = 
+            typeof response.cookies === 'object' ? 
+            JSON.stringify(response.cookies, null, 2) : 
+            response.cookies;
+
+          document.getElementById('techData').textContent = 
+            JSON.stringify(response.technicalInfo, null, 2);
+
+          document.getElementById('formData').textContent = 
+            JSON.stringify(response.formData, null, 2);
+        } catch (error) {
+          console.error("Erreur lors de l'affichage:", error);
+        }
+      } else {
+        console.error("Pas de réponse reçue");
+      }
     });
   });
-  
-  function displayData(data) {
-    const container = document.getElementById('dataContainer');
-    
-    const sections = {
-      'Cookies': data.cookies,
-      'Données de navigation': data.navigationData,
-      'Informations techniques': data.technicalInfo,
-      'Données de formulaire': data.formData
-    };
-  
-    for (const [title, content] of Object.entries(sections)) {
-      if (content && Object.keys(content).length > 0) {
-        const section = document.createElement('div');
-        section.className = 'data-section';
-        
-        const titleEl = document.createElement('div');
-        titleEl.className = 'data-title';
-        titleEl.textContent = title;
-        
-        const valueEl = document.createElement('div');
-        valueEl.className = 'data-value';
-        valueEl.textContent = JSON.stringify(content, null, 2);
-        
-        section.appendChild(titleEl);
-        section.appendChild(valueEl);
-        container.appendChild(section);
-      }
-    }
-  }
-  
-
-  
+});

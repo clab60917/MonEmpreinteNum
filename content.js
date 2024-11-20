@@ -1,35 +1,27 @@
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+console.log("Content script chargé");
+chrome.runtime.onMessage.addListener(
+  function(request, sender, sendResponse) {
+    console.log("Message reçu dans content.js:", request);
     if (request.type === "GET_DATA") {
-      const collectedData = {
-        cookies: document.cookie.split(';').reduce((acc, current) => {
-          const [key, value] = current.trim().split('=');
-          acc[key] = value;
-          return acc;
-        }, {}),
-        
+      const data = {
+        cookies: document.cookie,
         navigationData: {
           currentURL: window.location.href,
-          referrer: document.referrer,
-          lastVisited: localStorage.getItem('lastVisit'),
+          referrer: document.referrer
         },
-        
         technicalInfo: {
           userAgent: navigator.userAgent,
           language: navigator.language,
-          screenResolution: `${window.screen.width}x${window.screen.height}`,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          screenResolution: `${window.screen.width}x${window.screen.height}`
         },
-        
-        formData: Array.from(document.getElementsByTagName('form')).map(form => ({
+        formData: Array.from(document.forms).map(form => ({
           id: form.id,
-          fields: Array.from(form.elements).map(element => ({
-            type: element.type,
-            name: element.name,
-            id: element.id
-          }))
+          elements: form.elements.length
         }))
       };
-      
-      sendResponse(collectedData);
+      console.log("Données collectées:", data);
+      sendResponse(data);
     }
-  });
+    return true; // Très important pour le sendResponse asynchrone
+  }
+);

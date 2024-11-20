@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Fond circulaire avec dégradé -->
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5C9CE6"/>
+      <stop offset="100%" style="stop-color:#4A90E2"/>
+    </linearGradient>
+  </defs>
+  <circle cx="64" cy="64" r="60" fill="url(#grad)"/>
+  
+  <!-- Symbole de l'œil -->
+  <path d="M64 40C40 40 20 64 20 64C20 64 40 88 64 88C88 88 108 64 108 64C108 64 88 40 64 40Z" fill="white"/>
+  
+  <!-- Pupille de l'œil avec dégradé -->
+  <circle cx="64" cy="64" r="16" fill="#4A90E2"/>
+  
+  <!-- Reflet dans l'œil -->
+  <circle cx="58" cy="58" r="6" fill="white"/>
+  
+  <!-- Données visualisées (points connectés) -->
+  <circle cx="35" cy="64" r="3" fill="white"/>
+  <circle cx="93" cy="64" r="3" fill="white"/>
+  <path d="M38 64 L90 64" stroke="white" stroke-width="1" opacity="0.5"/>
+  
+  <!-- Points de données additionnels -->
+  <circle cx="45" cy="70" r="2" fill="white" opacity="0.7"/>
+  <circle cx="83" cy="58" r="2" fill="white" opacity="0.7"/>
+  <path d="M35 64 C45 70 83 58 93 64" stroke="white" stroke-width="0.5" opacity="0.3"/>
+</svg>

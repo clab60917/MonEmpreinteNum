@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <!-- Fond circulaire -->
+  <circle cx="24" cy="24" r="23" fill="#4A90E2"/>
+  <!-- Symbole de l'œil -->
+  <path d="M24 15C14 15 6 24 6 24C6 24 14 33 24 33C34 33 42 24 42 24C42 24 34 15 24 15Z" fill="white"/>
+  <!-- Pupille -->
+  <circle cx="24" cy="24" r="6" fill="#4A90E2"/>
+  <!-- Reflet -->
+  <circle cx="22" cy="22" r="2.5" fill="white"/>
+  <!-- Points de données -->
+  <circle cx="12" cy="24" r="1.5" fill="white"/>
+  <circle cx="36" cy="24" r="1.5" fill="white"/>
+  <path d="M13.5 24 L34.5 24" stroke="white" stroke-width="0.5" opacity="0.5"/>
+</svg>
