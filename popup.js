@@ -172,6 +172,31 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
       </div>
     `;
+  
+    // Mise à jour du badge de l'extension
+    updateExtensionBadge(scoreData);
+  }
+  
+  function updateExtensionBadge(scoreData) {
+    // Définir la couleur en fonction du score
+    let color;
+    if (scoreData.score >= 75) {
+      color = [39, 174, 96, 255]; // Vert
+    } else if (scoreData.score >= 40) {
+      color = [241, 196, 15, 255]; // Orange
+    } else {
+      color = [231, 76, 60, 255]; // Rouge
+    }
+  
+    // Mettre à jour la couleur de la pastille
+    chrome.action.setBadgeBackgroundColor({
+      color: color
+    });
+  
+    // Mettre à jour le texte de la pastille
+    chrome.action.setBadgeText({
+      text: `${scoreData.score}`
+    });
   }
   
   function getScoreColorClass(score) {
