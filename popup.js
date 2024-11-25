@@ -46,9 +46,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 <span class="text-sm">${response.technicalInfo.screenResolution}</span>
               </div>
               <div class="bg-green-50 p-3 rounded">
-                <span class="font-medium">🕒 Fuseau horaire</span><br>
-                <span class="text-sm">${response.technicalInfo.timezone}</span>
+                <span class="font-medium">⚡️ Processeurs</span><br>
+                <span class="text-sm">${response.technicalInfo.cores} cœurs</span>
               </div>
+            </div>
+  
+            <h3 class="text-lg font-semibold text-green-600 mt-4 mb-3">Scripts externes (${response.externalScripts?.length || 0})</h3>
+            <div class="max-h-40 overflow-y-auto space-y-2">
+              ${response.externalScripts?.map(script => `
+                <div class="bg-green-50 p-2 rounded text-sm">
+                  <div class="font-medium truncate">${new URL(script.src).hostname}</div>
+                  <div class="text-xs text-gray-600">
+                    ${script.async ? '⚡️ async' : ''} 
+                    ${script.defer ? '⏳ defer' : ''}
+                  </div>
+                </div>
+              `).join('') || 'Aucun script externe détecté'}
             </div>
           `;
         }
