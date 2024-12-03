@@ -46,8 +46,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <span class="text-sm">${response.technicalInfo.screenResolution}</span>
               </div>
               <div class="bg-green-50 p-3 rounded">
-                <span class="font-medium">⚡️ Processeurs</span><br>
-                <span class="text-sm">${response.technicalInfo.cores} cœurs</span>
+                <span class="font-medium">🕒 Fuseau horaire</span><br>
+                <span class="text-sm">${response.technicalInfo.timezone}</span>
               </div>
             </div>
   
