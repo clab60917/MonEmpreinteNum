@@ -42,8 +42,9 @@ function updateBadge(data, tabId) {
         tabId: tabId
     });
 
+    // Ajuster la taille de la pastille
     chrome.action.setBadgeText({
-        text: score.toString(),
+        text: " ",  // Un espace unique pour créer une pastille de taille minimale
         tabId: tabId
     });
 }

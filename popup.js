@@ -163,9 +163,10 @@ document.addEventListener('DOMContentLoaded', function() {
     chrome.action.setBadgeBackgroundColor({
       color: color
     });
-  
+
+    // Ajuster la taille de la pastille
     chrome.action.setBadgeText({
-      text: scoreData.score.toString()
+        text: " "  // Un espace unique pour créer une pastille de taille minimale
     });
   }
   
