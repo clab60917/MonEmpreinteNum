@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <span class="text-sm">${response.technicalInfo.userAgent.match(/\((.*?)\)/)[1]}</span>
               </div>
               <div class="bg-green-50 p-3 rounded">
-                <span class="font-medium">🌍 Langue</span><br>
+                <span class="font-medium">🌍 Region / Langue</span><br>
                 <span class="text-sm">${response.technicalInfo.language}</span>
               </div>
               <div class="bg-green-50 p-3 rounded">
@@ -53,15 +53,38 @@ document.addEventListener('DOMContentLoaded', function() {
   
             <h3 class="text-lg font-semibold text-green-600 mt-4 mb-3">Scripts externes (${response.externalScripts?.length || 0})</h3>
             <div class="max-h-40 overflow-y-auto space-y-2">
-              ${response.externalScripts?.map(script => `
-                <div class="bg-green-50 p-2 rounded text-sm">
-                  <div class="font-medium truncate">${new URL(script.src).hostname}</div>
-                  <div class="text-xs text-gray-600">
-                    ${script.async ? '⚡️ async' : ''} 
-                    ${script.defer ? '⏳ defer' : ''}
-                  </div>
-                </div>
-              `).join('') || 'Aucun script externe détecté'}
+              ${(() => {
+                // Regrouper les scripts par hostname
+                const uniqueScripts = response.externalScripts?.reduce((acc, script) => {
+                  const hostname = new URL(script.src).hostname;
+                  if (!acc[hostname]) {
+                    acc[hostname] = {
+                      count: 1,
+                      async: script.async,
+                      defer: script.defer
+                    };
+                  } else {
+                    acc[hostname].count++;
+                    acc[hostname].async = acc[hostname].async || script.async;
+                    acc[hostname].defer = acc[hostname].defer || script.defer;
+                  }
+                  return acc;
+                }, {}) || {};
+
+                return Object.entries(uniqueScripts)
+                  .map(([hostname, info]) => `
+                    <div class="bg-green-50 p-2 rounded text-sm">
+                      <div class="font-medium truncate flex justify-between">
+                        <span>${hostname}</span>
+                        ${info.count > 1 ? `<span class="text-gray-500">(${info.count})</span>` : ''}
+                      </div>
+                      <div class="text-xs text-gray-600">
+                        ${info.async ? '⚡️ async' : ''} 
+                        ${info.defer ? '⏳ defer' : ''}
+                      </div>
+                    </div>
+                  `).join('') || 'Aucun script externe détecté';
+              })()}
             </div>
           `;
         }
